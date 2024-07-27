@@ -1,25 +1,32 @@
-import os
+import hmac
 import streamlit as st
-from youtube_transcript_api import YouTubeTranscriptApi
-import google.generativeai as genai
-import streamlit_authenticator as stauth
 
-names = ['John Smith', 'Rebecca Briggs']
-usernames = ['jsmith', 'rbriggs']
-passwords = ['$2b$12$ikUrwI2x2hpp6Geu1jvkCuAWDI8aCRSC6hlTQik1Pj6P7t1anywc.', '$2b$12$dlr.rPEzKG.xEUaTB/mk1.hlZyCsoUYZ3wCBmtRTWgLQZsoaPEOyG']
+def check_password():
+    """Returns `True` if the user had the correct password."""
 
-#hashed_passwords = stauth.Hasher(passwords).generate()
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if hmac.compare_digest(st.session_state["password"], st.secrets["password"]):
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store the password.
+        else:
+            st.session_state["password_correct"] = False
 
-authenticator = stauth.Authenticate(names, usernames, passwords,
-    'some_cookie_name', 'some_signature_key')
+    # Return True if the password is validated.
+    if st.session_state.get("password_correct", False):
+        return True
 
-name, authentication_status, username = authenticator.login('Login', 'main')
+    # Show input for password.
+    st.text_input(
+        "Password", type="password", on_change=password_entered, key="password"
+    )
+    if "password_correct" in st.session_state:
+        st.error("😕 Password incorrect")
+    return False
 
-if authentication_status:
-    authenticator.logout('Logout', 'main')
-    st.write(f'Welcome *{name}*')
-    st.title('Some content')
-elif authentication_status == False:
-    st.error('Username/password is incorrect')
-elif authentication_status == None:
-    st.warning('Please enter your username and password')
+if not check_password():
+    st.stop()  # Do not continue if check_password is not True.
+
+# Main Streamlit app starts here
+st.write("Here goes your normal Streamlit app...")
+st.button("Click me")
