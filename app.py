@@ -54,21 +54,22 @@ if not check_password():
     st.stop()  # Do not continue if check_password is not True.
 
 # Streamlit app
-st.title("Jake's YouTube Video Summarizer")
-youtube_link = st.text_input("Enter YouTube Video Link:")
+st.title("YouTube Video Summarizer")
+st.html("<h6>built by: jake waddle<br>ai: google-gemini</h6>")
+st.html('<h4>COPY AND PASTE YOUTUBE VIDEO LINK INTO THE INPUT BOX BELOW</h4>')
+youtube_link = st.text_input("copy link here")
 
 if youtube_link:
     video_id = youtube_link.split("=")[1]
     st.image(f"http://img.youtube.com/vi/{video_id}/0.jpg", use_column_width=True)
 
+st.html('<h4>REMOVE THE DEFAULT VALUES BELOW AND ENTER YOUR OWN QUESTION OR PROMPT ABOUT THE VIDEO</h4>')
 # Text area for custom prompt input
-custom_prompt = st.text_area("Enter your custom prompt:", 
-                                value="""Welcome, Video Summarizer! Your task is to distill the essence of a given YouTube video transcript into expository essay format. 
-                                        Your essay should capture the key points, timelines, and essential information within a 800-word limit. 
-                                        Let's dive into the provided transcript and extract the vital details for our audience.""")
+custom_prompt = st.text_area("enter prompt below", 
+                                value="""write a question or something about this video and ai will respond\nexample: summarize this video and capture the key points, timelines, and essential information within a 800-word limit""")
 
 # Button to trigger summary generation
-if st.button("Get Detailed Notes"):
+if st.button("Get Response"):
     transcript_text = extract_transcript_details(youtube_link)
 
     if transcript_text:
@@ -76,5 +77,5 @@ if st.button("Get Detailed Notes"):
         essay = generate_gemini_content(transcript_text, custom_prompt)
         
         # Display essay
-        st.markdown("## Essay Form:")
+        st.html("<h5>Reponse</h5>")
         st.write(essay)
