@@ -26,6 +26,20 @@ def generate_gemini_content(transcript_text, prompt):
     response = model.generate_content(prompt + transcript_text)
     return response.text
 
+def convert_youtube_link(link):
+    # if desktop link format, then keep
+    if "youtube.com/watch" in link:
+        return link
+    
+    # check for mobile link and convert
+    if "youtu.be" in link:
+        video_id = link.split('/')[-1].split('?')[0]
+        desktop_link = f"https://www.youtube.com/watch?v={video_id}"
+        return desktop_link
+    
+
+    return "Invalid YouTube link"
+
 # auth functions
 def check_password():
     """Returns `True` if the user had the correct password."""
@@ -57,20 +71,21 @@ if not check_password():
 st.title("YouTube Video Summarizer")
 st.html("<h6>built by: jake waddle<br>ai: google-gemini</h6>")
 st.html('<h4>COPY AND PASTE YOUTUBE VIDEO LINK INTO THE INPUT BOX BELOW</h4>')
-youtube_link = st.text_input("copy link here")
+raw_youtube_link = st.text_input("copy link here")
 
-if youtube_link:
-    video_id = youtube_link.split("=")[1]
+if raw_youtube_link:
+    converted_youtube_link = convert_youtube_link(raw_youtube_link)
+    video_id = converted_youtube_link.split("=")[1]
     st.image(f"http://img.youtube.com/vi/{video_id}/0.jpg", use_column_width=True)
 
 st.html('<h4>REMOVE THE DEFAULT VALUES BELOW AND ENTER YOUR OWN QUESTION OR PROMPT ABOUT THE VIDEO</h4>')
 
 custom_prompt = st.text_area("enter prompt below", 
-                                value="""write a question or something about this video and ai will respond\nexample: summarize this video and capture the key points, timelines, and essential information within a 800-word limit""")
+                                value="""write a question or ask for a summary about this video and ai will respond""")
 
 
 if st.button("Get Response"):
-    transcript_text = extract_transcript_details(youtube_link)
+    transcript_text = extract_transcript_details(converted_youtube_link)
 
     if transcript_text:
         
